@@ -1,0 +1,43 @@
+baseurl = "/"
+languageCode = "en-us"
+title = "Jacques Peeters's blog"
+theme = "hugo-lithium-theme"
+googleAnalytics = "UA-105385962-1"
+disqusShortname = "jacquespeeters"
+ignoreFiles = ["\\.Rmd$", "\\.Rmarkdown$", "_files$", "_cache$"]
+
+[permalinks]
+    post = "/:year/:month/:day/:slug/"
+
+[[menu.main]]
+    name = "About"
+    url = "/about/"
+[[menu.main]]
+    name = "GitHub"
+    url = "https://github.com/jacquespeeters"
+[[menu.main]]
+    name = "LinkedIn"
+    url = "https://www.linkedin.com/in/j4cquespeeters/"
+
+[[menu.main]]
+    name = "Kaggle"
+    url = "https://www.kaggle.com/jacquespeeters"
+
+[params]
+    description = "A website built through Hugo and blogdown."
+
+    # options for highlight.js (version, additional languages, and theme)
+    highlightjsVersion = "9.11.0"
+    highlightjsCDN = "//cdn.bootcss.com"
+    highlightjsLang = ["r", "yaml"]
+    highlightjsTheme = "github"
+
+    MathJaxCDN = "//cdn.bootcss.com"
+    MathJaxVersion = "2.7.1"
+
+    [params.logo]
+    url = "logo.png"
+    width = 50
+    height = 50
+    alt = "Logo"
+
