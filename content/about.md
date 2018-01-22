@@ -5,7 +5,7 @@ date: "2016-05-05T21:48:51-07:00"
 
 ![Photo](https://media.licdn.com/mpr/mpr/shrinknp_400_400/AAEAAQAAAAAAAAexAAAAJGM3OTliZGQ4LTc0YmEtNGY4Mi1hYjEwLWUwN2FhMTI5YmZlOA.jpg)
 
-Hellow world, i'm jacques peeters, a data scientist consultant and a Kaggler expert. 
+Hello world, I'm jacques peeters, a data scientist consultant and a Kaggler expert. 
 
 Python and R are my favorite tools. I compete on Kaggle and DataScience.net in order to sharpen my machine learning skills. I regularly attend "Paris Machine Learning" and "French Data" meetups.
 
