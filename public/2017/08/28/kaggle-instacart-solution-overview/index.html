@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Hugo 0.26" />
+
+
+<title>Kaggle instacart (top2%) feature engineering and solution overview - Jacques Peeters&#39;s blog</title>
+<meta property="og:title" content="Kaggle instacart (top2%) feature engineering and solution overview - Jacques Peeters&#39;s blog">
+
+
+
+  
+
+
+
+
+
+
+
+
+<link href='//cdn.bootcss.com/highlight.js/9.11.0/styles/github.min.css' rel='stylesheet' type='text/css' />
+
+
+
+<link rel="stylesheet" href="/css/fonts.css" media="all">
+<link rel="stylesheet" href="/css/main.css" media="all">
+
+
+
+  </head>
+  <body>
+    <div class="wrapper">
+      <header class="header">
+        <nav class="nav">
+  <a href="/" class="nav-logo">
+    <img src="/images/logo.png"
+         width="50"
+         height="50"
+         alt="Logo">
+  </a>
+
+  <ul class="nav-links">
+    
+    <li><a href="/">Home</a></li>
+    
+    <li><a href="/about/">About</a></li>
+    
+    <li><a href="https://github.com/jacquespeeters">GitHub</a></li>
+    
+    <li><a href="https://www.kaggle.com/jacquespeeters">Kaggle</a></li>
+    
+    <li><a href="https://www.linkedin.com/in/j4cquespeeters/">LinkedIn</a></li>
+    
+  </ul>
+</nav>
+
+      </header>
+
+
+<main class="content" role="main">
+
+  <article class="article">
+    
+    <span class="article-duration">10 min read</span>
+    
+
+    <h1 class="article-title">Kaggle instacart (top2%) feature engineering and solution overview</h1>
+
+    
+    <span class="article-date">2017/08/28</span>
+    
+
+    <div class="article-content">
+      <div id="intro" class="section level1">
+<h1>Intro</h1>
+<p>This blog post aims at showing what kind of feature engineering can be achieved in order to improve machine learning models.</p>
+<p>I entered <a href="https://www.kaggle.com/c/instacart-market-basket-analysis">Kaggle’s instacart-market-basket-analysis</a> challenge with goals such as :</p>
+<ul>
+<li>finish top5% of a Kaggle competition</li>
+<li>keep learning Python (i come from R)</li>
+</ul>
+<p>I ended up 52nd (top2%) ouf of 2623 data scientists, which i’m pretty happy with afterwards eventhough i was bitter during the last week because i lost some competitive edges i had due to the release of <a href="https://www.kaggle.com/c/instacart-market-basket-analysis/discussion/37221">this</a> and <a href="https://www.kaggle.com/c/instacart-market-basket-analysis/discussion/37697">this</a> public posts. I’m also now part of the Kaggle master club and ranked 1162 out of 65 891 worldwide data scientists.</p>
+<p>Instacart delivers groceries from local stores and asked Kaggle community to predict which products will be reordered by customers during their next purchase. Submissions will be evaluated based on their mean <a href="https://en.wikipedia.org/wiki/F1_score">F1 score</a>.</p>
+<p>Here are some keys numbers:</p>
+<ul>
+<li>200 000 customers</li>
+<li>3 million orders</li>
+<li>32 million products purchased</li>
+<li>50 000 unique products</li>
+</ul>
+<p>In this blog post i’ll detail my general approach (in a machine learning way) and the feature engineering work which was done. Feature engineering is the oil allowing machine learning models to shine. In my opinion feature engineering and data wrangling is more important than models!</p>
+<p>My whole code can be found on my Github <a href="https://github.com/jacquespeeters/instacart-market-basket-analysis">here</a>.</p>
+<p>Few ideas were shared by people on the Kaggle forum i thank them.</p>
+</div>
+<div id="general-approach" class="section level1">
+<h1>General approach</h1>
+<div id="feature-engineering" class="section level2">
+<h2>Feature engineering</h2>
+<p>There are less than 15 unique variables in the provided data, around 70 features were created in order to finish with 85 before the modeling phase. I will describe interesting features below.</p>
+</div>
+<div id="machine-learning" class="section level2">
+<h2>Machine learning</h2>
+<p>Since we are asked to predict which product will be reordered by customers, the product candidates for each customer is the list of product he has already bought atleast once. This can be seen as the binary classification problem where each tuple (user, product) is an observation targeted 0 or 1. I won’t explain in this post why this approach is more accurate and/or less computionnaly intensive than others (multi-label, Factorization machine, …) but focus on feature engineering.</p>
+<p>Moreover, it was possible to predict that an user would reorder <strong>none</strong> of his past products. Predicting none is different from predicting a tuple (user, product). Therefore i created a second model for this purpose. Some features from this second model were extracted from the predictions of the first one.</p>
+<p>Finals models are based on gradient boosted trees from <a href="https://github.com/Microsoft/LightGBM">LightGBM</a>.</p>
+</div>
+<div id="workstation" class="section level2">
+<h2>Workstation</h2>
+<p>I used to work locally (Macbook Pro, 2,9 GHz Intel Core i5, 16 Go Ram) on an sample of data in order to iterate quickly. My models were running but i had to wait one hour in order to submit my solution on all data.</p>
+<p>During the last two weeks, i set up a virtual machine on Google Cloud with more CPU and RAM in order to get quickier results (and also be able to create new data based not only on the N orders but also the N-1 orders).</p>
+</div>
+</div>
+<div id="available-data" class="section level1">
+<h1>Available data</h1>
+<p>In this part i’ll introduce data available for this competition. I added some features in this part, but it was done for further feature engineering.</p>
+<div id="orders" class="section level2">
+<h2>orders</h2>
+<p>Informations about orders :</p>
+<ul>
+<li>order_id</li>
+<li>user_id</li>
+<li>eval_set - If the order is part from train (last order from 125k users), test (last order from 75k users we need to predict on Kaggle), prior (past orders)</li>
+<li>order_number - First order is 1, last is N</li>
+<li>order_dow - Day of week</li>
+<li>order_hour_of_day</li>
+<li>days_since_prior_order - Number of days before the last order</li>
+<li>date - Inverse cumsum of days_since_prior_order (added for further FE)</li>
+<li>order_number_reverse - First order is N, last is 1 (added for further FE)</li>
+<li>last_basket_size - Number of products purchased in last order (added for further FE)</li>
+</ul>
+</div>
+<div id="order_priortraintest" class="section level2">
+<h2>order_[prior|train|test]</h2>
+<ul>
+<li>order_id</li>
+<li>user_id</li>
+<li>add_to_cart_order - Position of the product in the cart</li>
+<li>reordered - “Is the product reordered or not?”</li>
+<li>order_size - Size of the order (basket size)</li>
+<li>add_to_cart_order_inverted - Inverse position of the product in the cart (added for further FE)</li>
+<li>add_to_cart_order_relative - Relative position of the product in the cart (added for further FE)</li>
+</ul>
+</div>
+<div id="products" class="section level2">
+<h2>products</h2>
+<p>Basic information about products, not much to add.</p>
+</div>
+<div id="aisles" class="section level2">
+<h2>aisles</h2>
+<p>Basic information about aisles. Aisles contain products.</p>
+</div>
+<div id="departments" class="section level2">
+<h2>departments</h2>
+<p>Basic information about departements. Departements contain aisles.</p>
+</div>
+</div>
+<div id="feature-enginerring" class="section level1">
+<h1>Feature enginerring</h1>
+<div id="users_products.f" class="section level2">
+<h2>users_products.f</h2>
+<p>Features based on the interaction of users and products :</p>
+<ul>
+<li>user_id</li>
+<li>product_id</li>
+<li>UP_order_strike - Detailed bellow</li>
+<li>up_nb_reordered - Number of times product was reordered</li>
+<li>up_last_order_number - Last order number (used for further FE)</li>
+<li>up_first_order_number - First order number (used for further FE)</li>
+<li>UP_date_strike - Detailed bellow</li>
+<li>up_add_to_cart_order_inverted_mean - Mean of add_to_cart_order_inverted - “Is the product added to the list at the end?”</li>
+<li>up_add_to_cart_order_mean - Mean add_to_cart_order -“Is the product added to the list in the beggining?”</li>
+<li>up_first_date_number - First date number (used for further FE)</li>
+<li>up_last_order_date - “When was the last (user,product) purchase”</li>
+<li>up_add_to_cart_order_relative_mean - “When is the product added to cart?”</li>
+</ul>
+<p><strong>UP_order_strike was my strongest feature in my model.</strong> Users reorder of does not products. So each series of (user, product) is a series of 0 and 1. Well it can be binary encoded, and allows to capture every pattern in a single feature and gives more importance to recent purchases (which is not the case with a basic mean).</p>
+<p>Here is the Python code to help understanding how it is computed. I’ve choosen a power of 1/2 because i wanted “bigger is better” instead of “smaller is better”</p>
+<p>ie : For an user with 5 orders (NA means the product wasn’t bought yet)<br />
+0 0 0 0 1 = 1/2**5 = 0.03125 a product bought the first time and never purchased again<br />
+1 1 NA NA NA = 1/2**1 + 1/2**2 = 0.75 a product purchased the last two times<br />
+1 0 0 1 NA = 1/2**1 + 1/2**4 = 0.5625</p>
+<p>Same idea is applied on date.</p>
+</div>
+<div id="user_aisle_fe" class="section level2">
+<h2>user_aisle_fe</h2>
+<p>Feature based on the interaction of users and aisles :</p>
+<ul>
+<li>user_id</li>
+<li>aisle_id</li>
+<li>UA_product_rt - Ratio of products purchased by the user in this aisle</li>
+</ul>
+</div>
+<div id="user_department_fe" class="section level2">
+<h2>user_department_fe</h2>
+<p>Feature based on the interaction of users and departments :</p>
+<ul>
+<li>user_id</li>
+<li>aisle_id</li>
+<li>UD_product_rt - Ratio of products purchased by the user in this department</li>
+</ul>
+</div>
+<div id="users_fe" class="section level2">
+<h2>users_fe</h2>
+<p>Feature engineering based on users :</p>
+<ul>
+<li>user_id</li>
+<li>U_rt_reordered - Reordering ratio - “does the user tends to purchase new products?”</li>
+<li>U_basket_sum - Number of products purchased</li>
+<li>U_basket_mean - Mean number of products purchased per order (basket size) - “how much products does the user buys?”</li>
+<li>U_basket_std - Standard deviation number of products per order - “does the user have different basked size?</li>
+<li>u_reorder_rt_bool - Mean of “the product was reordered atleast once”</li>
+<li>u_active_p - Number of unique products</li>
+<li>U_date_inscription - Date of the first order</li>
+<li>U_days_since_std - Standard deviation of days since prior order - “does the user have different days_since_prior_order?</li>
+<li>U_days_since_mean - Mean of days since prior order - “does the user orders often or not?”</li>
+<li>U_none_reordered_mean - Mean of “no products were reordered, only new products”</li>
+<li>U_none_reordered_strike - Binary encoding (explained in detail in user_product part above) of “no products were reordered, only new products”</li>
+</ul>
+</div>
+<div id="products_fe_mod" class="section level2">
+<h2>products_fe_mod</h2>
+<p>Feature engineering on products :</p>
+<ul>
+<li>product_id</li>
+<li>P_recency_order_r - Mean(order_number_reverse)</li>
+<li>P_recency_order - Mean(order_number)</li>
+<li>p_add_to_cart_order - Mean(add_to_cart_order)</li>
+<li>p_count - Number of time the product was bought</li>
+<li>p_reorder_rt - Mean of the users’ mean of reaorder ratio of the product</li>
+<li>P_recency_date - Mean(date)</li>
+<li>p_reorder_rt_bool - Mean of the users’ “the product was reordered at least once”</li>
+<li>p_active_user - Number of unique users who purchased the product atleast once</li>
+<li>p_size - Number of time the product was reordered</li>
+<li>p_trend_rt - Number of times the product was bought in order N / number of times the product was bought in order N-1</li>
+<li>p_trend_diff - Number of times the product was bought in order N minus number of times the product was bought in order N-1</li>
+<li>p_freq_order - Mean number of orders before the product is reordered</li>
+<li>p_freq_days - Mean days before the product is reordered</li>
+<li>user_fold - user folder - i created the above stastitics for each user folder, i did it because i wanted to include data from training data and while avoiding data leak (in order to consolidate the products statistics), but in the end it didn’t help much</li>
+</ul>
+</div>
+<div id="aisles_fe" class="section level2">
+<h2>aisles_fe</h2>
+<p>Feature engineering on aisles :</p>
+<ul>
+<li>aisle_id</li>
+<li>a_reorder_rt - Mean of the users’ mean of reaorder ratio in aisle</li>
+<li>a_count - Number of time a product was bought in the aisle</li>
+<li>a_add_to_cart_order - Mean add_to_cart_order of the products bought in the aisle</li>
+<li>a_reorder_rt_bool - Mean of the users’ “the product was reordered at least once” in this aisle</li>
+<li>a_active_user - Number of unique users in the aisle</li>
+</ul>
+</div>
+<div id="departments_fe.f" class="section level2">
+<h2>departments_fe.f</h2>
+<p>Basicly the same feature engineering that on aisles but on departments :</p>
+<ul>
+<li>department_id</li>
+<li>d_reorder_rt - Mean of the users’ mean of reaorder ratio in department</li>
+<li>d_count - Number of time a product was bought in the department</li>
+<li>d_add_to_cart_order - Mean add_to_cart_order of the products bought in the department</li>
+<li>d_reorder_rt_bool - Mean of the users’ “the product was reordered at least once” in this department</li>
+<li>d_active_user - Number of unique users in the department</li>
+</ul>
+</div>
+<div id="product2vec.f" class="section level2">
+<h2>product2vec.f</h2>
+<p>Features created from product embeddings. It’s the same idea as word embedding but on products. Each orders is considered as a sentence. Products can be seen as words.</p>
+<p>Find out more <a href="https://www.kaggle.com/omarito/word2vec-for-products-analysis-0-01-lb">here</a>. The idea was nice but in the end it didn’t help much and even not at all. But it did cost computing power.</p>
+</div>
+<div id="mult_none_cv" class="section level2">
+<h2>mult_none_cv</h2>
+<p>Features calculed from the first stage model’s predictions :</p>
+<ul>
+<li>order_id</li>
+<li>user_id</li>
+<li>pred_none_prod - <span class="math inline">\(\prod_{i=1}^{N} 1-p_{i,u}\)</span> with <span class="math inline">\(p_{i,u}\)</span> the probability of reordering for product i, user u from the first model - probability of reordering None if there were independance betweens products (which is not the case, that’s why a 2nd model is needed)</li>
+<li>pred_basket_sum - <span class="math inline">\(\sum_{i=1}^{N} 1-p_{i,u}\)</span> with <span class="math inline">\(p_{i,u}\)</span> the probability of reordering for product i, user u from the first model - estimated basket size of reordered products</li>
+<li>pred_basket_std - standard deviation of <span class="math inline">\(p_{i,u}\)</span> for all products i of the user u</li>
+</ul>
+<p>It is done with cross-validation in order to avoid any data leak.</p>
+</div>
+<div id="additionnal-features" class="section level2">
+<h2>Additionnal features</h2>
+<p>Once i joined every tables from my feature engineering store, i computed some simple additionnal features based on feature from different tables :</p>
+<ul>
+<li>user_id</li>
+<li>product_id</li>
+<li>UP_rt_reordered - Reordering ratio of the product</li>
+<li>UP_rt_reordered_since_first - Reordering ration of the product since the first time product was bought</li>
+<li>UP_days_no-reordered - Number of days since the product wasn’t bought</li>
+<li>UP_freq_nb_no-reordered - UP_days_no-reordered divided by up_add_to_cart_order_mean - should be able to capture periodicity</li>
+<li>UP_sum_basket_rt - up_nb_reordered divided by U_basket_sum</li>
+<li>O_days_since_prior_order_diff - days_since_prior_order minus days_since_prior_order_mean</li>
+<li>O_days_since_prior_order_rt - days_since_prior_order divided days_since_prior_order_mean</li>
+</ul>
+</div>
+<div id="target---user_past_product" class="section level2">
+<h2>Target - user_past_product</h2>
+<p>Table created in order to list products reordered in train (positive sample) and all products ordered atleast once but not reordered in train set (negative sample).</p>
+<ul>
+<li>user_id</li>
+<li>product_id</li>
+<li>reordered - Our target - “Was the product reordered in the train set?”</li>
+</ul>
+<p><strong>Note</strong> : For the test set, a list of (user,product) candidate was generated.</p>
+</div>
+</div>
+<div id="machine-learning-model" class="section level1">
+<h1>Machine learning model</h1>
+<div id="models" class="section level2">
+<h2>Models</h2>
+<p>Well i don’t want to focus on this part, morevore there is nothing amazing. I did a simple 90% train / 10% validation split based on users for both models.</p>
+<p>Here are the parameters for the first model :</p>
+<pre class="python"><code>lgb_train = lgb.Dataset(X_train, label=y_train)
+param = {&#39;objective&#39;: &#39;binary&#39;, 
+          &#39;metric&#39;: [&#39;binary_logloss&#39;], 
+          &#39;learning_rate&#39;:0.025, 
+          &#39;verbose&#39;: 0}</code></pre>
+<p>And the second one (predicting None) :</p>
+<pre class="python"><code>lgb_train_none = lgb.Dataset(X_train_none, label=y_train_none, max_bin=100)
+param_none = {&#39;objective&#39;: &#39;binary&#39;, 
+              &#39;metric&#39;: [&#39;binary_logloss&#39;], 
+              &#39;learning_rate&#39;:0.05,
+              &#39;num_leaves&#39;:3, 
+              &#39;min_data_in_leaf&#39;:500, 
+              &#39;verbose&#39;: 0}</code></pre>
+</div>
+<div id="features-importance" class="section level2">
+<h2>Features importance</h2>
+<p>Bellow the features importance from both models. It highlights how important are each features we created.</p>
+<p>I’m not good at plotting on Python, and i’ve some difficulties with lightgbm plotting API, therefore sorry for the imperfects graphics.</p>
+<p>First model (only top40 otherwise it is not lisible anymore) :</p>
+<p><img src="/post/2017-08-28-kaggle-instacart-solution-overview_files/figure-html/model1-1.png" width="672" /></p>
+<p>We can clearly see that UP_order_strike the binary encoding based claim the first place.</p>
+<p>Second model :</p>
+<p><img src="/post/2017-08-28-kaggle-instacart-solution-overview_files/figure-html/model2-1.png" width="672" /></p>
+<p>The features extrated from first models prediction are placed high (top4).</p>
+</div>
+</div>
+<div id="post-processing" class="section level1">
+<h1>Post processing</h1>
+<p>I applied <a href="https://www.kaggle.com/c/instacart-market-basket-analysis/discussion/37221">this script</a> which was better than mine in order to optimize F-score. I don’t want to focus on it here.</p>
+</div>
+<div id="conclusion" class="section level1">
+<h1>Conclusion</h1>
+<p>All this work allowed me to have a really good model placing in the top2% of the competition.</p>
+<p>This is one of my first tech post, so feedbacks are welcome :) If you are new to machine learning, i hope you have know a better now understanding at how feature engineering can be done. And that the secret sauce in ML is a good feature engineering and not the best model.</p>
+<p>I didn’t win the competition, some people had better and more features, but i’m still learning, i hope to reach top1% next time!</p>
+<p>Leave me a comment or advice!</p>
+</div>
+
+    </div>
+  </article>
+
+  
+<section id="comments">
+  <div id="disqus_thread"></div>
+  <script>
+  var disqus_config = function () {
+  
+  };
+  (function() {
+    var inIFrame = function() {
+      var iframe = true;
+      try { iframe = window.self !== window.top; } catch (e) {}
+      return iframe;
+    };
+    if (inIFrame()) return;
+    var d = document, s = d.createElement('script');
+    s.src = '//jacquespeeters.disqus.com/embed.js'; s.async = true;
+    s.setAttribute('data-timestamp', +new Date());
+    (d.head || d.body).appendChild(s);
+  })();
+  </script>
+  <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</section>
+
+
+
+</main>
+
+      <footer class="footer">
+        <ul class="footer-links">
+          <li>
+            <a href="/index.xml" type="application/rss+xml" target="_blank">RSS feed</a>
+          </li>
+          <li>
+            <a href="https://gohugo.io/" class="footer-links-kudos">Made with <img src="/images/hugo-logo.png" width="22" height="22"></a>
+          </li>
+        </ul>
+      </footer>
+
+    </div>
+    
+
+
+
+<script src="//cdn.bootcss.com/highlight.js/9.11.0/highlight.min.js"></script>
+
+
+
+<script src="//cdn.bootcss.com/highlight.js/9.11.0/languages/r.min.js"></script>
+<script src="//cdn.bootcss.com/highlight.js/9.11.0/languages/yaml.min.js"></script>
+<script>hljs.configure({languages: []}); hljs.initHighlightingOnLoad();</script>
+
+
+
+    
+<script src="/js/math-code.js"></script>
+<script async src="//cdn.bootcss.com/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+
+
+    
+<script>
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-105385962-1', 'auto');
+ga('send', 'pageview');
+</script>
+
+  </body>
+</html>
+

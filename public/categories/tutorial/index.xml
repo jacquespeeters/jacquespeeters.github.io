@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Tutorial on Jacques Peeters&#39;s blog</title>
+    <link>/categories/tutorial/</link>
+    <description>Recent content in Tutorial on Jacques Peeters&#39;s blog</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Mon, 21 Aug 2017 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="/categories/tutorial/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Hint at a better parallelization of groupby in Pandas</title>
+      <link>/2017/08/21/parallel-pandas-groupby/</link>
+      <pubDate>Mon, 21 Aug 2017 00:00:00 +0000</pubDate>
+      
+      <guid>/2017/08/21/parallel-pandas-groupby/</guid>
+      <description>Intro Parallelizing large amount of groups might requiere a lot of time without parallization. However directly parallize groups when the number of groups is very large and the function applied to each of them is rather fast, might lead to worse result than no parallezation.
+Parallelizing every group creates a chunk of data for each group. Each chunk needs to be transfered to cores in order to be processed. Transfering chunk of data costs time.</description>
+    </item>
+    
+  </channel>
+</rss>

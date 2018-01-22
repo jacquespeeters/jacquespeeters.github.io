@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Hugo on Jacques Peeters&#39;s blog</title>
+    <link>/categories/hugo/</link>
+    <description>Recent content in Hugo on Jacques Peeters&#39;s blog</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Sun, 20 Aug 2017 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="/categories/hugo/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Create your own blog with Blogdown</title>
+      <link>/2017/08/20/how-was-this-blog-created/</link>
+      <pubDate>Sun, 20 Aug 2017 00:00:00 +0000</pubDate>
+      
+      <guid>/2017/08/20/how-was-this-blog-created/</guid>
+      <description>Intro This blog was created thanks to blogdown which is based on Hugo. Github allows you to host your personal static blog on it, find more in the links bellow.
+Useful Links https://github.com/rstudio/blogdown https://proquestionasker.github.io/blog/Making_Site https://bookdown.org/yihui/blogdown/ https://hjdskes.github.io/blog/update-deploying-hugo-on-personal-gh-pages/</description>
+    </item>
+    
+  </channel>
+</rss>
