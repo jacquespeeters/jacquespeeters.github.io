@@ -91,13 +91,10 @@ import timeit
 import time
 #import dask
 #import dask.dataframe as dd
-
 def applyParallel(dfGrouped, func):
     with Pool(cpu_count()) as p:
         ret_list = p.map(func, [group for name, group in dfGrouped])
     return pd.concat(ret_list)
-
-
 # Create a Dataframe for a minimum example
 df = pd.DataFrame()
 # 5000 users with approx 100 values
@@ -106,56 +103,51 @@ df[&quot;user_id&quot;] = np.random.randint(5000, size=500000)
 df[&quot;value&quot;] = np.random.randint(30, size=500000)
 # Create data_chunk based on modulo of user_id
 df[&quot;data_chunk&quot;] = df[&quot;user_id&quot;].mod(cpu_count() * 3)
-
 # Any not optimised and intensive function i want to apply to each group
 def group_function(group):
     # Inverse cumulative sum
     group[&quot;inv_sum&quot;] = group.iloc[::-1][&#39;value&#39;].cumsum()[::-1].shift(-1).fillna(0)
     return group
-
 def func_group_apply(df):
     return df.groupby(&quot;user_id&quot;).apply(group_function)
     
 start = time.time()
 normal = df.groupby(&quot;user_id&quot;).apply(group_function)
 end = time.time()
-print(&quot;Execution time :&quot; + str(end - start))
-
-start = time.time()
+print(&quot;Execution time :&quot; + str(end - start))</code></pre>
+<pre><code>## Execution time :6.532907009124756</code></pre>
+<pre class="python"><code>start = time.time()
 parallel = applyParallel(df.groupby(&quot;user_id&quot;), group_function)
 end = time.time()
-print(&quot;Execution time :&quot; + str(end - start))
-
-start = time.time()
+print(&quot;Execution time :&quot; + str(end - start))</code></pre>
+<pre><code>## Execution time :5.594306945800781</code></pre>
+<pre class="python"><code>start = time.time()
 parallel_chunk = applyParallel(df.groupby(&quot;data_chunk&quot;) , func_group_apply)
 end = time.time()
 print(&quot;Execution time :&quot; + str(end - start))
-
 # Let&#39;s check if we have the same results and that we didn&#39;t any problem with the parallel computation
-# Sorting on index is part from the test, and not from the compution, therefore i don&#39;t include it in Execution time part
-normal = normal.sort_index()
+# Sorting on index is part from the test, and not from the compution, therefore i don&#39;t include it in Execution time part</code></pre>
+<pre><code>## Execution time :3.0170300006866455</code></pre>
+<pre class="python"><code>normal = normal.sort_index()
 parallel = parallel.sort_index()
 parallel_chunk = parallel_chunk.sort_index()
 #parallel_dask = parallel_dask.sort_index()
-
 # Check we have same results
-print(normal.equals(parallel))
-print(normal.equals(parallel_chunk))
+print(normal.equals(parallel))</code></pre>
+<pre><code>## True</code></pre>
+<pre class="python"><code>print(normal.equals(parallel_chunk))
 #print(normal.equals(parallel_dask))</code></pre>
-<pre><code>## Execution time :6.7392418384552
-## Execution time :8.99045181274414
-## Execution time :4.967257022857666
-## True
-## True</code></pre>
+<pre><code>## True</code></pre>
 <p>Setup : Intel(R) Core(TM) i5-5287U CPU @ 2.90GHz (2c/4t)</p>
 <p>Or %timeit results.</p>
-<pre class="python"><code>%timeit df.groupby(&quot;user_id&quot;).apply(group_function)
-%timeit applyParallel(df.groupby(&quot;user_id&quot;), group_function)
-%timeit applyParallel(df.groupby(&quot;group&quot;) , func_group_apply)
-
+<pre class="python"><code>print(&quot;Not working yet&quot;)
+#%timeit df.groupby(&quot;user_id&quot;).apply(group_function)
+#%timeit applyParallel(df.groupby(&quot;user_id&quot;), group_function)
+#%timeit applyParallel(df.groupby(&quot;group&quot;) , func_group_apply)
 # 1 loop, best of 3: 6.79 s per loop
 # 1 loop, best of 3: 5.61 s per loop
 # 1 loop, best of 3: 3.23 s per loop</code></pre>
+<pre><code>## Not working yet</code></pre>
 <p>The chunk parallelization clearly yield better results than the two others solution.</p>
 </div>
 <div id="dask-implementation" class="section level2">
