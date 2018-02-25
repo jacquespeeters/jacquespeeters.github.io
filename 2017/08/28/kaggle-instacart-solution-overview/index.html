@@ -73,7 +73,19 @@
     
 
     <div class="article-content">
-      <div id="intro" class="section level1">
+      <style>
+body {
+  text-align: justify
+}
+
+pre code, pre, code {
+  white-space: pre !important;
+  overflow-x: scroll !important;
+  word-break: keep-all !important;
+  word-wrap: initial !important;
+}
+</style>
+<div id="intro" class="section level1">
 <h1>Intro</h1>
 <p>This blog post aims at showing what kind of feature engineering can be achieved in order to improve machine learning models.</p>
 <p>I entered <a href="https://www.kaggle.com/c/instacart-market-basket-analysis">Kaggle’s instacart-market-basket-analysis</a> challenge with goals such as :</p>
@@ -177,6 +189,12 @@
 </ul>
 <p><strong>UP_order_strike was my strongest feature in my model.</strong> Users reorder of does not products. So each series of (user, product) is a series of 0 and 1. Well it can be binary encoded, and allows to capture every pattern in a single feature and gives more importance to recent purchases (which is not the case with a basic mean).</p>
 <p>Here is the Python code to help understanding how it is computed. I’ve choosen a power of 1/2 because i wanted “bigger is better” instead of “smaller is better”</p>
+<pre><code>order_prior[&quot;UP_order_strike&quot;] = 1 / 2 ** (order_prior[&quot;order_number_reverse&quot;])
+
+users_products = order_prior. \
+    groupby([&quot;user_id&quot;, &quot;product_id&quot;]). \
+    agg({..., \
+         &#39;UP_order_strike&#39;: {&quot;UP_order_strike&quot;: &quot;sum&quot;}})</code></pre>
 <p>ie : For an user with 5 orders (NA means the product wasn’t bought yet)<br />
 0 0 0 0 1 = 1/2**5 = 0.03125 a product bought the first time and never purchased again<br />
 1 1 NA NA NA = 1/2**1 + 1/2**2 = 0.75 a product purchased the last two times<br />

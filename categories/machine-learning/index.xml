@@ -17,7 +17,7 @@
       <pubDate>Mon, 28 Aug 2017 00:00:00 +0000</pubDate>
       
       <guid>/2017/08/28/kaggle-instacart-solution-overview/</guid>
-      <description>Intro This blog post aims at showing what kind of feature engineering can be achieved in order to improve machine learning models.
+      <description>body { text-align: justify } pre code, pre, code { white-space: pre !important; overflow-x: scroll !important; word-break: keep-all !important; word-wrap: initial !important; }  Intro This blog post aims at showing what kind of feature engineering can be achieved in order to improve machine learning models.
 I entered Kaggle’s instacart-market-basket-analysis challenge with goals such as :
  finish top5% of a Kaggle competition keep learning Python (i come from R)  I ended up 52nd (top2%) ouf of 2623 data scientists, which i’m pretty happy with afterwards eventhough i was bitter during the last week because i lost some competitive edges i had due to the release of this and this public posts.</description>
     </item>

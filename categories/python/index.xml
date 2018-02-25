@@ -17,8 +17,7 @@
       <pubDate>Mon, 21 Aug 2017 00:00:00 +0000</pubDate>
       
       <guid>/2017/08/21/parallel-pandas-groupby/</guid>
-      <description>Intro Parallelizing large amount of groups might requiere a lot of time without parallization. However directly parallize groups when the number of groups is very large and the function applied to each of them is rather fast, might lead to worse result than no parallezation.
-Parallelizing every group creates a chunk of data for each group. Each chunk needs to be transfered to cores in order to be processed. Transfering chunk of data costs time.</description>
+      <description>body { text-align: justify } pre code, pre, code { white-space: pre !important; overflow-x: scroll !important; word-break: keep-all !important; word-wrap: initial !important; }  Intro Parallelizing large amount of groups might requiere a lot of time without parallization. However directly parallize groups when the number of groups is very large and the function applied to each of them is rather fast, might lead to worse result than no parallezation.</description>
     </item>
     
   </channel>
